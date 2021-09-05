@@ -8,13 +8,26 @@ from voicevox_engine.acoustic_feature_extractor import (
     OjtPhoneme,
     SamplingData,
 )
-from voicevox_engine.model import AccentPhrase, AudioQuery
+from voicevox_engine.model import AccentPhrase, AudioQuery, Mora
 
 unvoiced_mora_phoneme_list = ["A", "I", "U", "E", "O", "cl", "pau"]
 mora_phoneme_list = ["a", "i", "u", "e", "o", "N"] + unvoiced_mora_phoneme_list
 
 
-def to_flatten_moras(accent_phrases: List[AccentPhrase]):
+def to_flatten_moras(accent_phrases: List[AccentPhrase]) -> List[Mora]:
+    """
+    accent_phrasesに含まれるMora(とpause_moraがあればそれも)を
+    すべて一つのリストに結合する
+    Parameters
+    ----------
+    accent_phrases : List[AccentPhrase]
+        AccentPhraseのリスト
+
+    Returns
+    -------
+    moras : List[Mora]
+        結合されたMoraのリストを返す
+    """
     return list(
         chain.from_iterable(
             accent_phrase.moras
