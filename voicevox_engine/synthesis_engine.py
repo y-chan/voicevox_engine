@@ -123,6 +123,20 @@ class SynthesisEngine:
 
         # accent
         def _repeat_with_mora(array: numpy.ndarray, accent_phrase: AccentPhrase):
+            """
+            moraの数だけあるarrayの要素数をphonemeの数まで増やす(変換する)
+            Parameters
+            ----------
+            array : numpy.ndarray
+                moraの数だけ要素数があるarray
+            accent_phrase : AccentPhrase
+                アクセント句モデル
+
+            Returns
+            -------
+            array : numpy.ndarray
+                phonemeの数まで拡張されたarrayを返す
+            """
             return numpy.repeat(
                 array,
                 [
