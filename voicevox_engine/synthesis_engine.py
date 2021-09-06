@@ -122,7 +122,7 @@ class SynthesisEngine:
         phoneme_str_list = ["pau"] + phoneme_str_list + ["pau"]
 
         # accent
-        def _repeat_with_mora(array, accent_phrase):
+        def _repeat_with_mora(array: numpy.ndarray, accent_phrase: AccentPhrase):
             return numpy.repeat(
                 array,
                 [
