@@ -6,7 +6,6 @@ from typing import List, Optional
 
 import numpy as np
 import resampy
-import romkan
 import soundfile
 import uvicorn
 from fastapi import FastAPI, Response
@@ -15,6 +14,7 @@ from starlette.responses import FileResponse
 
 from voicevox_engine.full_context_label import extract_full_context_label
 from voicevox_engine.model import AccentPhrase, AudioQuery, Mora, Speaker
+from voicevox_engine.mora_list import openjtalk_mora2text
 from voicevox_engine.synthesis_engine import SynthesisEngine
 
 
@@ -74,18 +74,10 @@ def make_synthesis_engine(
 
 
 def mora_to_text(mora: str):
-    if mora == "cl":
-        return "ッ"
-    elif mora == "ti":
-        return "ティ"
-    elif mora == "tu":
-        return "トゥ"
-    elif mora == "di":
-        return "ディ"
-    elif mora == "du":
-        return "ドゥ"
+    if mora in openjtalk_mora2text:
+        return openjtalk_mora2text[mora]
     else:
-        return romkan.to_katakana(mora)
+        return mora
 
 
 def generate_app(engine: SynthesisEngine) -> FastAPI:
@@ -106,10 +98,10 @@ def generate_app(engine: SynthesisEngine) -> FastAPI:
         allow_headers=["*"],
     )
 
-    def replace_mora_pitch(
+    def replace_mora_data(
         accent_phrases: List[AccentPhrase], speaker_id: int
     ) -> List[AccentPhrase]:
-        return engine.extract_phoneme_f0(
+        return engine.replace_phoneme_data(
             accent_phrases=accent_phrases, speaker_id=speaker_id
         )
 
@@ -118,7 +110,7 @@ def generate_app(engine: SynthesisEngine) -> FastAPI:
             return []
 
         utterance = extract_full_context_label(text)
-        return replace_mora_pitch(
+        return replace_mora_data(
             accent_phrases=[
                 AccentPhrase(
                     moras=[
@@ -131,14 +123,23 @@ def generate_app(engine: SynthesisEngine) -> FastAPI:
                                 if mora.consonant is not None
                                 else None
                             ),
+                            consonant_length=0 if mora.consonant is not None else None,
                             vowel=mora.vowel.phoneme,
+                            vowel_length=0,
                             pitch=0,
                         )
                         for mora in accent_phrase.moras
                     ],
                     accent=accent_phrase.accent,
                     pause_mora=(
-                        Mora(text="、", consonant=None, vowel="pau", pitch=0)
+                        Mora(
+                            text="、",
+                            consonant=None,
+                            consonant_length=None,
+                            vowel="pau",
+                            vowel_length=0,
+                            pitch=0,
+                        )
                         if (
                             i_accent_phrase == len(breath_group.accent_phrases) - 1
                             and i_breath_group != len(utterance.breath_groups) - 1
@@ -186,13 +187,13 @@ def generate_app(engine: SynthesisEngine) -> FastAPI:
         return create_accent_phrases(text, speaker_id=speaker)
 
     @app.post(
-        "/mora_pitch",
+        "/mora_data",
         response_model=List[AccentPhrase],
         tags=["クエリ編集"],
-        summary="アクセント句から音高を得る",
+        summary="アクセント句から音高・音素長を得る",
     )
-    def mora_pitch(accent_phrases: List[AccentPhrase], speaker: int):
-        return replace_mora_pitch(accent_phrases, speaker_id=speaker)
+    def mora_data(accent_phrases: List[AccentPhrase], speaker: int):
+        return replace_mora_data(accent_phrases, speaker_id=speaker)
 
     @app.post(
         "/synthesis",
