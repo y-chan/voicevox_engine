@@ -76,8 +76,12 @@ class BasePhoneme(object):
 
     @classmethod
     @abstractmethod
-    def convert(cls, phonemes: List["BasePhoneme"]) -> List["BasePhoneme"]:
-        pass
+    def convert(cls, phonemes):
+        if "sil" in phonemes[0].phoneme:
+            phonemes[0].phoneme = cls.space_phoneme
+        if "sil" in phonemes[-1].phoneme:
+            phonemes[-1].phoneme = cls.space_phoneme
+        return phonemes
 
     @classmethod
     def load_julius_list(cls, path: Path):
@@ -147,12 +151,8 @@ class JvsPhoneme(BasePhoneme):
     space_phoneme = "pau"
 
     @classmethod
-    def convert(cls, phonemes: List["JvsPhoneme"]):
-        if "sil" in phonemes[0].phoneme:
-            phonemes[0].phoneme = cls.space_phoneme
-        if "sil" in phonemes[-1].phoneme:
-            phonemes[-1].phoneme = cls.space_phoneme
-        return phonemes
+    def convert(cls, phonemes: List["JvsPhoneme"]) -> List["JvsPhoneme"]:
+        return super().convert(phonemes)
 
 
 class OjtPhoneme(BasePhoneme):
@@ -207,12 +207,8 @@ class OjtPhoneme(BasePhoneme):
     space_phoneme = "pau"
 
     @classmethod
-    def convert(cls, phonemes: List["OjtPhoneme"]):
-        if "sil" in phonemes[0].phoneme:
-            phonemes[0].phoneme = cls.space_phoneme
-        if "sil" in phonemes[-1].phoneme:
-            phonemes[-1].phoneme = cls.space_phoneme
-        return phonemes
+    def convert(cls, phonemes: List["OjtPhoneme"]) -> List["OjtPhoneme"]:
+        return super().convert(phonemes)
 
 
 class PhonemeType(str, Enum):
