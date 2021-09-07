@@ -21,7 +21,10 @@ class SamplingData:
         return self.array[indexes.astype(int)]
 
 
-class BasePhoneme(object):
+class BasePhoneme:
+    """
+    音素の応用クラス群の抽象基底クラス
+    """
     phoneme_list: Sequence[str]
     num_phoneme: int
     space_phoneme: str
