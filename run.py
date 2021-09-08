@@ -45,9 +45,9 @@ def make_synthesis_engine(
             sys.path.insert(0, str(voicevox_dir))
 
     try:
-        import each_cpp_forwarder
+        import core
     except ImportError:
-        from voicevox_engine.dev import each_cpp_forwarder
+        from voicevox_engine.dev import core
 
         # 音声ライブラリの Python モジュールをロードできなかった
         print(
@@ -56,24 +56,21 @@ def make_synthesis_engine(
         )
 
     if voicelib_dir is None:
-        voicelib_dir = Path(each_cpp_forwarder.__file__).parent
+        voicelib_dir = Path(__file__).parent  # core.__file__だとnuitkaビルド後にエラー
 
-    each_cpp_forwarder.initialize(
-        voicelib_dir.as_posix() + "/",
-        "1",
-        "2",
-        "3",
-        use_gpu,
-    )
+    core.initialize(voicelib_dir.as_posix() + "/", use_gpu)
 
     return SynthesisEngine(
-        yukarin_s_forwarder=each_cpp_forwarder.yukarin_s_forward,
-        yukarin_sa_forwarder=each_cpp_forwarder.yukarin_sa_forward,
-        decode_forwarder=each_cpp_forwarder.decode_forward,
+        yukarin_s_forwarder=core.yukarin_s_forward,
+        yukarin_sa_forwarder=core.yukarin_sa_forward,
+        decode_forwarder=core.decode_forward,
     )
 
 
 def mora_to_text(mora: str):
+    if mora[-1:] in ["A", "I", "U", "E", "O"]:
+        # 無声化母音を小文字に
+        mora = mora[:-1] + mora[-1].lower()
     if mora in openjtalk_mora2text:
         return openjtalk_mora2text[mora]
     else:
