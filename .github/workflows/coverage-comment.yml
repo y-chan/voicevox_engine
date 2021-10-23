@@ -86,6 +86,7 @@ jobs:
                 body,
               })
             } else {
+              const test = 'test'
               github.rest.issues.updateComment({
                 comment_id: listComments[0].id,
                 owner: context.repo.owner,
