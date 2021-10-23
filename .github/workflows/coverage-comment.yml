@@ -61,7 +61,7 @@ jobs:
                   }
                   line[3] = `![coverage-${parcent}%](https://img.shields.io/badge/coverage-${parcent}%25-${color}.svg)`
                 }
-                report += "|" + line.join("|") + "|\n"
+                report += '|' + line.join('|') + '|\n'
               }
               if (line[0] === 'TOTAL') break
             }
