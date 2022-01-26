@@ -74,7 +74,7 @@ jobs:
 
       - name: Show Python binary archs (debug info)
         shell: bash
-        run: lipo -archs /usr/local/bin/python
+        run: lipo -archs /usr/local/bin/python3
 
       - name: Prepare Python dependencies cache
         uses: actions/cache@v2
@@ -88,13 +88,13 @@ jobs:
       - name: Install Python dependencies
         shell: bash
         run: |
-          pip install --upgrade pip setuptools wheel
-          pip install -r requirements-dev.txt
+          pip3 install --upgrade pip setuptools wheel
+          pip3 install -r requirements-dev.txt
 
       - name: Generate licenses.json
         shell: bash
         run: |
-          python generate_licenses.py > licenses.json
+          python3 generate_licenses.py > licenses.json
 
       # Download ONNX Runtime
       - name: Export ONNX Runtime url to calc hash
@@ -173,7 +173,7 @@ jobs:
           # try 5 times, sleep 5 seconds before retry
           for i in $(seq 5); do
             EXIT_CODE=0
-            python -c "import pyopenjtalk; pyopenjtalk._lazy_init()" || EXIT_CODE=$?
+            python3 -c "import pyopenjtalk; pyopenjtalk._lazy_init()" || EXIT_CODE=$?
 
             if [ "$EXIT_CODE" = "0" ]; then
               break
@@ -194,7 +194,7 @@ jobs:
           gsed -i "s/__version__ = \"latest\"/__version__ = \"${{ env.VOICEVOX_ENGINE_VERSION }}\"/" ../voicevox_engine/__init__.py
 
           # Nuitka does not copy grandchild dependencies. Explicitly copy libonnxruntime
-          python -m nuitka \
+          python3 -m nuitka \
             --output-dir=./ \
             --standalone \
             --plugin-enable=numpy \
@@ -231,13 +231,13 @@ jobs:
       # Please remove this step when you have solved the problem with Nuitka.
       - name: Copy the missing .dylib files into the distribution
         run: |
-          python build_util/macos/copy_missing_dylibs.py build/run.dist/
+          python3 build_util/macos/copy_missing_dylibs.py build/run.dist/
 
       # NOTE: This task should ideally be done by Nuitka in the `Build run.py` step.
       # Please remove this step when you have solved the problem with Nuitka.
       - name: Fix the rpaths of the .dylib files in the distribution
         run: |
-          python build_util/macos/fix_rpaths.py build/run.dist/
+          python3 build_util/macos/fix_rpaths.py build/run.dist/
 
       # FIXME: versioned name may be useful; but
       # actions/download-artifact and dawidd6/download-artifact do not support
