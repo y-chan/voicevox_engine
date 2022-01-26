@@ -67,6 +67,7 @@ jobs:
         shell: bash
         run: |
           set -eux
+          brew install openssl
           ./configure --enable-universalsdk --with-universal-archs=universal2
           make
           make install
