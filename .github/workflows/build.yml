@@ -12,7 +12,7 @@ env:
   IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/voicevox_engine
   PYTHON_VERSION: '3.8.10'
   VOICEVOX_RESOURCE_VERSION: '0.10.preview.2'
-  VOICEVOX_CORE_VERSION: '0.10.preview.3'
+  VOICEVOX_CORE_VERSION: '0.10.preview.6'
   VOICEVOX_ENGINE_VERSION: |- # releaseのときはタグが、それ以外はlatestがバージョン名に
     ${{ github.event.release.tag_name != '' && github.event.release.tag_name || 'latest' }}
 
@@ -23,11 +23,10 @@ jobs:
       matrix:
         include:
         - os: macos-11
-          python_architecture: 'x64'
           pip_cache_path: ~/Library/Caches/pip
-          voicevox_core_library_name: libcore_cpu_x64.dylib
-          onnxruntime_url: https://github.com/microsoft/onnxruntime/releases/download/v1.9.0/onnxruntime-osx-x64-1.9.0.tgz
-          artifact_name: macos-x64
+          voicevox_core_library_name: libcore_cpu_universal2.dylib
+          onnxruntime_url: https://github.com/microsoft/onnxruntime/releases/download/v1.10.0/onnxruntime-osx-universal2-1.10.0.tgz
+          artifact_name: macos-universal2
 
     runs-on: ${{ matrix.os }}
 
@@ -48,12 +47,34 @@ jobs:
       - name: Create download and build directory
         run: mkdir download build
 
-      - name: Setup Python
-        id: setup-python
-        uses: actions/setup-python@v2
+      # Build Python 3 for OSX Universal2
+      - name: Prepare Python ${{ env.PYTHON_VERSION }} cache
+        uses: actions/cache@v2
+        id: python-cache
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          architecture: ${{ matrix.python_architecture }}
+          key: python-${{ env.PYTHON_VERSION }}
+          path: download/python
+
+      - name: Checkout Python ${{ env.PYTHON_VERSION }}
+        if: steps.python-cache.outputs.cache-hit != 'true'
+        uses: actions/checkout@v2
+        with:
+          repository: python/cpython
+          ref: v${{ env.PYTHON_VERSION }}
+          path: download/python
+
+      - name: Build and Install Python ${{ env.PYTHON_VERSION }}
+        shell: bash
+        run: |
+          set -eux
+          ./configure --enable-universalsdk --with-universal-archs=universal2
+          make
+          make install
+        working-directory: download/python
+
+      - name: Show Python binary archs (debug info)
+        shell: bash
+        run: lipo -archs /usr/local/bin/python
 
       - name: Prepare Python dependencies cache
         uses: actions/cache@v2
@@ -198,6 +219,9 @@ jobs:
             --no-prefer-source-code \
             ../run.py
         working-directory: build
+        env:
+          CCFLAGS: -arch arm64 -arch x86_64
+          LDFLAGS: -arch arm64 -arch x86_64
 
       - name: Set @rpath to @executable_path
         run: |
