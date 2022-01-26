@@ -68,9 +68,7 @@ jobs:
         run: |
           set -eux
           brew install openssl
-          export LDFLAGS="-L/usr/local/opt/openssl@3/lib"
-          export CPPFLAGS="-I/usr/local/opt/openssl@3/include"
-          ./configure --enable-universalsdk --with-universal-archs=universal2
+          ./configure --enable-universalsdk --with-universal-archs=universal2 --with-openssl=/usr/local/opt/openssl@3/
           make
           make install
         working-directory: download/python
