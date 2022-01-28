@@ -1,8 +1,8 @@
 import json
 import os
+import ssl
 import subprocess
 import urllib.request
-import ssl
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import List, Optional
