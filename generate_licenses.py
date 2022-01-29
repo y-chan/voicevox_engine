@@ -159,6 +159,11 @@ def generate_licenses() -> List[License]:
                     "https://raw.githubusercontent.com/cython/cython/master/LICENSE.txt"
                 ) as res:
                     license.text = res.read().decode()
+            elif license.name.lower() == "soundfile":
+                with urllib.request.urlopen(
+                    "https://raw.githubusercontent.com/bastibe/python-soundfile/master/LICENSE"
+                ) as res:
+                    license.text = res.read().decode()
             else:
                 # ライセンスがpypiに無い
                 raise Exception(f"No License info provided for {license.name}")
