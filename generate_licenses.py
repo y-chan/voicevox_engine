@@ -164,6 +164,23 @@ def generate_licenses() -> List[License]:
                     "https://raw.githubusercontent.com/bastibe/python-soundfile/master/LICENSE"
                 ) as res:
                     license.text = res.read().decode()
+            elif license.name.lower() == "cffi":
+                with urllib.request.urlopen(
+                    "https://foss.heptapod.net/pypy/cffi/-/raw/branch/default/LICENSE"
+                ) as res:
+                    license.text = res.read().decode()
+            elif license.name.lower() == "pydantic":
+                with urllib.request.urlopen(
+                    "https://raw.githubusercontent.com/samuelcolvin/pydantic/master/LICENSE"
+                ) as res:
+                    license.text = res.read().decode()
+                    print("pydantic")
+            elif license.name.lower() == "pyyaml":
+                with urllib.request.urlopen(
+                    "https://raw.githubusercontent.com/yaml/pyyaml/master/LICENSE"
+                ) as res:
+                    license.text = res.read().decode()
+                    print("pyyaml")
             else:
                 # ライセンスがpypiに無い
                 raise Exception(f"No License info provided for {license.name}")
