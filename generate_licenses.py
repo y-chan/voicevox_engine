@@ -8,9 +8,11 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import List, Optional
 
+
 # osxのuniversal libraryビルド時に、SSLエラーに引っかかるので、それを回避する
-if platform.system() == "Darwin" and os.environ["CI"] == "true":
+if platform.system() == "Darwin" and os.environ.get("CI") == "true":
     ssl._create_default_https_context = ssl._create_unverified_context
+
 
 @dataclass
 class License:
