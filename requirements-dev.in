@@ -1,6 +1,6 @@
 -r requirements.in
 cython
-nuitka>=0.6.19.3
+git+https://github.com/y-chan/Nuitka@9eb853fefe6febd5a9c90431165a52ef8c461999#egg=nuitka
 pip-licenses
 pip-tools
 pre-commit

@@ -46,7 +46,7 @@ idna==3.3
     # via anyio
 nodeenv==1.6.0
     # via pre-commit
-nuitka==0.6.19.3
+nuitka @ git+https://github.com/y-chan/Nuitka@9eb853fefe6febd5a9c90431165a52ef8c461999
     # via -r requirements-dev.in
 numpy==1.22.0
     # via
