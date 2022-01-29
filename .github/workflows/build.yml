@@ -158,7 +158,7 @@ jobs:
         shell: bash
         run: |
           # TODO: バージョン指定で導入しているので、requirements-*.txtが更新された際に忘れそう
-          # pipでインストールされるnumpyとscipyはx86_64版になるので、あらかじめuniversal2版を入れておく
+          # pipでインストールされるnumpyはx86_64版になるので、あらかじめuniversal2版を入れておく
           curl -L https://files.pythonhosted.org/packages/72/45/6749d5851b31f66db379760b6d9053d2d99f72ba19fa114c9b893c4704ec/numpy-1.22.0-cp38-cp38-macosx_10_9_universal2.whl > download/numpy-1.22.0-cp38-cp38-macosx_10_9_universal2.whl
           python3 -m pip install ./download/numpy-1.22.0-cp38-cp38-macosx_10_9_universal2.whl
           # 以下、普通にインストールするとx86_64版になるのが、自前でビルド可能なのでビルドする
