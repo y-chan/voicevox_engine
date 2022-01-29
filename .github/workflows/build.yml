@@ -161,12 +161,19 @@ jobs:
           # pipでインストールされるnumpyはx86_64版になるので、あらかじめuniversal2版を入れておく
           curl -L https://files.pythonhosted.org/packages/72/45/6749d5851b31f66db379760b6d9053d2d99f72ba19fa114c9b893c4704ec/numpy-1.22.0-cp38-cp38-macosx_10_9_universal2.whl > download/numpy-1.22.0-cp38-cp38-macosx_10_9_universal2.whl
           python3 -m pip install ./download/numpy-1.22.0-cp38-cp38-macosx_10_9_universal2.whl
+          # Nuitka Buildでdylibが不足すると言われるので、コピーする
+          cd download
+          unzip numpy-1.22.0-cp38-cp38-macosx_10_9_universal2.whl
+          cd numpy
+          cp .dylibs/* /usr/local/lib/python3.8/site-packages/numpy/.dylibs/
+          cd ../..
           # 以下、普通にインストールするとx86_64版になるのが、自前でビルド可能なのでビルドする
           python3 -m pip install --no-binary cython cython==0.29.24
           python3 -m pip install --no-binary pydantic pydantic==1.8.2
           python3 -m pip install --no-binary cffi cffi==1.15.0
           python3 -m pip install --no-binary SoundFile SoundFile==0.10.3.post1
           python3 -m pip install --no-binary pyyaml pyyaml==6.0
+
           python3 -m pip install --upgrade pip setuptools wheel
           python3 -m pip install -r requirements-dev.txt
 
