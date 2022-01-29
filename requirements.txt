@@ -38,15 +38,15 @@ pycparser==2.20
     # via cffi
 pydantic==1.8.2
     # via fastapi
-pyopenjtalk @ git+https://github.com/VOICEVOX/pyopenjtalk@8466b5a331e4736181648d5585be626aa7f9bde1
+pyopenjtalk @ git+https://github.com/y-chan/pyopenjtalk@2346df8824c56d3625ce4284040b26ff078fac1a
     # via -r requirements.in
 python-multipart==0.0.5
     # via -r requirements.in
-pyworld==0.3.0
+pyworld @ git+https://github.com/y-chan/Python-Wrapper-for-World-Vocoder@9eae2c7abff9389327c3b3d454975b994c0633aa
     # via -r requirements.in
 pyyaml==6.0
     # via -r requirements.in
-scipy==1.7.1
+scipy==1.8.0rc3
     # via -r requirements.in
 six==1.16.0
     # via

@@ -1,10 +1,10 @@
-numpy
+numpy>=1.22
 fastapi
 python-multipart
 uvicorn
 aiofiles
 soundfile
-scipy
+scipy==1.8.0rc3
 PyYAML
-pyworld
-git+https://github.com/VOICEVOX/pyopenjtalk@8466b5a331e4736181648d5585be626aa7f9bde1#egg=pyopenjtalk
+git+https://github.com/y-chan/Python-Wrapper-for-World-Vocoder@9eae2c7abff9389327c3b3d454975b994c0633aa#egg=pyworld
+git+https://github.com/y-chan/pyopenjtalk@2346df8824c56d3625ce4284040b26ff078fac1a#egg=pyopenjtalk
