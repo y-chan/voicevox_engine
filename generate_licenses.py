@@ -181,6 +181,11 @@ def generate_licenses() -> List[License]:
                 ) as res:
                     license.text = res.read().decode()
                     print("pyyaml")
+            elif license.name.lower() == "numpy":
+                with urllib.request.urlopen(
+                    "https://raw.githubusercontent.com/numpy/numpy/main/LICENSE.txt"
+                ) as res:
+                    license.text = res.read().decode()
             else:
                 # ライセンスがpypiに無い
                 raise Exception(f"No License info provided for {license.name}")
