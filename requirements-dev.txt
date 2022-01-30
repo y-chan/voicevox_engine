@@ -48,7 +48,7 @@ nodeenv==1.6.0
     # via pre-commit
 nuitka @ git+https://github.com/y-chan/Nuitka@f42eb84af4b88ab955269e30305cd89c341ecb53
     # via -r requirements-dev.in
-numpy==1.22.0
+numpy==1.20.0
     # via
     #   -r requirements.in
     #   pyopenjtalk

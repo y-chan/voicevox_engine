@@ -158,13 +158,8 @@ jobs:
         shell: bash
         run: |
           # TODO: バージョン指定で導入しているので、requirements-*.txtが更新された際に忘れそう
-          # Universal2版を使うとNuitka Buildが失敗するので、後で共有ライブラリを置き換えるためにダウンロードして解凍する
-          # curl -L https://files.pythonhosted.org/packages/72/45/6749d5851b31f66db379760b6d9053d2d99f72ba19fa114c9b893c4704ec/numpy-1.22.0-cp38-cp38-macosx_10_9_universal2.whl > download/numpy-1.22.0-cp38-cp38-macosx_10_9_universal2.whl
-          # cd download
-          # unzip numpy-1.22.0-cp38-cp38-macosx_10_9_universal2.whl
-          # cd ..
           # 以下、普通にインストールするとx86_64版になるのが、自前でビルド可能なのでビルドする
-          python3 -m pip install --no-binary numpy numpy==1.22.0
+          python3 -m pip install --no-binary numpy numpy==1.20.0 --no-use-pep517
           python3 -m pip install --no-binary cython cython==0.29.24
           python3 -m pip install --no-binary pydantic pydantic==1.8.2
           python3 -m pip install --no-binary cffi cffi==1.15.0
