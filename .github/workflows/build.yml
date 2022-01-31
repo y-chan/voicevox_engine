@@ -80,7 +80,7 @@ jobs:
           python3 -m pip install --no-binary SoundFile SoundFile==0.10.3.post1
           python3 -m pip install --no-binary pyyaml pyyaml==6.0
 
-          python3 -m pip install --upgrade pip setuptools wheel
+          python3 -m pip install --upgrade pip pip-licenses setuptools wheel
           python3 -m pip install -r requirements-dev.txt
 
       - name: Generate licenses.json
