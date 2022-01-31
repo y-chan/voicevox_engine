@@ -179,8 +179,8 @@ jobs:
 
           # numpyとscipyで被っている.dylibを消す(重複しているものをNuitkaで処理しようとしてエラーが発生するので)
           # numpyのものは/usr/local/libに移動させる(/usr/local/libにあるものはNuitkaが認識してくれるため)
-          sudo mv /Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages/numpy/.dylibs/* /usr/local/lib/
-          sudo rm -r /Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages/numpy/.dylibs
+          sudo cp /Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages/numpy/.dylibs/* /usr/local/lib/
+          # sudo rm -r /Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages/numpy/.dylibs
           sudo rm -r /Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages/scipy/.dylibs
           # Nuitka does not copy grandchild dependencies. Explicitly copy libonnxruntime
           python3 -m nuitka \
