@@ -54,6 +54,7 @@ jobs:
           curl -L https://www.python.org/ftp/python/${{ env.PYTHON_VERSION }}/python-${{ env.PYTHON_VERSION }}-macos11.pkg > download/python-${{ env.PYTHON_VERSION }}-macos11.pkg
           sudo installer -pkg download/python-${{ env.PYTHON_VERSION }}-macos11.pkg -target /
           # Test
+          echo "/Library/Frameworks/Python.framework/Versions/3.8/bin/" >> $GITHUB_PATH
           python3 --version
 
       - name: Show Python binary archs (debug info)
