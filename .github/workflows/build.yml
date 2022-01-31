@@ -177,11 +177,12 @@ jobs:
           # Replace version
           gsed -i "s/__version__ = \"latest\"/__version__ = \"${{ env.VOICEVOX_ENGINE_VERSION }}\"/" ../voicevox_engine/__init__.py
 
-          # numpyとscipyで被っている.dylibを消す(重複しているものをNuitkaで処理しようとしてエラーが発生するので)
-          # numpyのものは/usr/local/libに移動させる(/usr/local/libにあるものはNuitkaが認識してくれるため)
-          sudo cp /Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages/numpy/.dylibs/* /usr/local/lib/
-          # sudo rm -r /Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages/numpy/.dylibs
-          sudo rm -r /Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages/scipy/.dylibs
+          # numpy内部で使われているライブラリのパス解決をしようとして失敗するので、パスを変更する
+          sudo install_name_tool \
+            -change @loader_path/../.dylibs/libopenblas64_.0.dylib \
+            /Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages/numpy/.dylibs/libopenblas64_.0.dylib \
+            /Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages/numpy/core/_multiarray_umath.cpython-38-darwin.so
+  
           # Nuitka does not copy grandchild dependencies. Explicitly copy libonnxruntime
           python3 -m nuitka \
             --output-dir=./ \
