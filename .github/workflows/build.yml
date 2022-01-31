@@ -49,110 +49,16 @@ jobs:
       - name: Create download and build directory
         run: mkdir download build
 
-      # Build OpenSSL for OSX Universal2
-      - name: Prepare Built OpenSSL ${{ matrix.openssl_version }} cache
-        uses: actions/cache@v2
-        id: openssl-cache
-        with:
-          key: openssl-${{ matrix.openssl_version }}
-          path: download/openssl-${{ matrix.openssl_version }}-universal2
-
-      - name: Build OpenSSL ${{ matrix.openssl_version }} and Install for Universal2
-        if: steps.openssl-cache.outputs.cache-hit != 'true'
-        shell: bash
+      - name: Install Python ${{ env.PYTHON_VERSION }}
         run: |
-          curl -L https://www.openssl.org/source/openssl-${{ matrix.openssl_version }}.tar.gz > download/openssl-${{ matrix.openssl_version }}.tar.gz
-          tar xf download/openssl-${{ matrix.openssl_version }}.tar.gz -C download/
-          rm download/openssl-${{ matrix.openssl_version }}.tar.gz
-          cp -r download/openssl-${{ matrix.openssl_version }} download/openssl-${{ matrix.openssl_version }}-x86_64
-          cp -r download/openssl-${{ matrix.openssl_version }} download/openssl-${{ matrix.openssl_version }}-arm64
-          mkdir download/openssl-${{ matrix.openssl_version }}-universal2
-          cd download/openssl-${{ matrix.openssl_version }}-x86_64
-          ./Configure darwin64-x86_64-cc shared
-          make
-          make DESTDIR=../openssl-${{ matrix.openssl_version }}-universal2 install
-          cd ../openssl-${{ matrix.openssl_version }}-arm64
-          ./Configure shared enable-rc5 zlib darwin64-arm64-cc no-asm
-          make
-          cd ../openssl-${{ matrix.openssl_version }}-universal2
-          rm usr/local/lib/libcrypto.3.dylib usr/local/lib/libssl.3.dylib usr/local/lib/libcrypto.a usr/local/lib/libssl.a 
-          lipo -create ../openssl-${{ matrix.openssl_version }}-arm64/libcrypto.3.dylib ../openssl-${{ matrix.openssl_version }}-x86_64/libcrypto.3.dylib -output usr/local/lib/libcrypto.3.dylib
-          lipo -create ../openssl-${{ matrix.openssl_version }}-arm64/libssl.3.dylib ../openssl-${{ matrix.openssl_version }}-x86_64/libssl.3.dylib -output usr/local/lib/libssl.3.dylib
-          lipo -create ../openssl-${{ matrix.openssl_version }}-arm64/libcrypto.a ../openssl-${{ matrix.openssl_version }}-x86_64/libcrypto.a -output usr/local/lib/libcrypto.a
-          lipo -create ../openssl-${{ matrix.openssl_version }}-arm64/libssl.a ../openssl-${{ matrix.openssl_version }}-x86_64/libssl.a -output usr/local/lib/libssl.a
-          sudo cp -r usr/* /usr/
-
-      - name: Restore OpenSSL ${{ matrix.openssl_version }} cache
-        if: steps.openssl-cache.outputs.cache-hit == 'true'
-        run: sudo cp -r usr/* /usr/
-        working-directory: download/openssl-${{ matrix.openssl_version }}-universal2
-
-      - name: Show OpenSSl binary archs (debug info)
-        shell: bash
-        run: |
-          lipo -archs /usr/local/lib/libcrypto.3.dylib
-          lipo -archs /usr/local/lib/libssl.3.dylib
-          lipo -archs /usr/local/lib/libcrypto.a
-          lipo -archs /usr/local/lib/libssl.a
-
-      # Build libsndfile for OSX Universal2
-      - name: Prepare Libsndfile ${{ matrix.libsndfile_version }} cache
-        uses: actions/cache@v2
-        id: libsndfile-cache
-        with:
-          key: python-${{ matrix.libsndfile_version }}
-          path: download/libsndfile
-
-      - name: Checkout Libsndfile ${{ matrix.libsndfile_version }}
-        if: steps.libsndfile-cache.outputs.cache-hit != 'true'
-        uses: actions/checkout@v2
-        with:
-          repository: libsndfile/libsndfile
-          ref: ${{ matrix.libsndfile_version }}
-          path: download/libsndfile
-
-      - name: Build and Install Libsndfile ${{ matrix.libsndfile_version }}
-        shell: bash
-        run: |
-          set -eux
-          brew install autoconf autogen automake
-          ./autogen.sh
-          ./configure --disable-external-libs --disable-mpeg
-          make
-          sudo make install
-        working-directory: download/libsndfile
-        env:
-          CFLAGS: -arch arm64 -arch x86_64
-          LDFLAGS: -arch arm64 -arch x86_64
-
-      # Build Python 3 for OSX Universal2
-      - name: Prepare Python ${{ env.PYTHON_VERSION }} cache
-        uses: actions/cache@v2
-        id: python-cache
-        with:
-          key: python-${{ env.PYTHON_VERSION }}
-          path: download/python
-
-      - name: Checkout Python ${{ env.PYTHON_VERSION }}
-        if: steps.python-cache.outputs.cache-hit != 'true'
-        uses: actions/checkout@v2
-        with:
-          repository: python/cpython
-          ref: v${{ env.PYTHON_VERSION }}
-          path: download/python
-
-      - name: Build and Install Python ${{ env.PYTHON_VERSION }}
-        shell: bash
-        run: |
-          set -eux
-          ./configure --enable-universalsdk --with-universal-archs=universal2 --with-openssl=/usr/local/
-          make
-          make install
-        working-directory: download/python
+          curl -L https://www.python.org/ftp/python/${{ env.PYTHON_VERSION }}/python-${{ env.PYTHON_VERSION }}-macos11.pkg > download/python-${{ env.PYTHON_VERSION }}-macos11.pkg
+          sudo installer -pkg download/python-${{ env.PYTHON_VERSION }}-macos11.pkg -target /
+          # Test
+          python3 --version
 
       - name: Show Python binary archs (debug info)
         shell: bash
-        run: lipo -archs /usr/local/bin/python3
+        run: lipo -archs /Library/Frameworks/Python.framework/Versions/3.8/bin/python3
 
       - name: Install Python dependencies
         shell: bash
