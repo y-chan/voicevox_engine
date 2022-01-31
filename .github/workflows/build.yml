@@ -65,23 +65,14 @@ jobs:
         shell: bash
         run: |
           # TODO: バージョン指定で導入しているので、requirements-*.txtが更新された際に忘れそう
-          # 以下、普通にインストールするとx86_64版になるのが、自前でビルド可能なのでビルドする
-          python3 -m pip install --no-binary cython cython==0.29.24
-          cd download
-          git clone https://github.com/numpy/numpy
-          cd numpy
-          git checkout v1.20.0
-          python3 -m pip install wheel
-          python3 setup.py bdist_wheel
-          cd dist
-          python3 -m pip install *.whl
-          cd ../../..
-          python3 -m pip install --no-binary pydantic pydantic==1.8.2
-          python3 -m pip install --no-binary cffi cffi==1.15.0
-          python3 -m pip install --no-binary SoundFile SoundFile==0.10.3.post1
-          python3 -m pip install --no-binary pyyaml pyyaml==6.0
+          # pipでインストールされるnumpyはx86_64版になるので、あらかじめuniversal2版を入れておく
+          curl -L https://files.pythonhosted.org/packages/72/45/6749d5851b31f66db379760b6d9053d2d99f72ba19fa114c9b893c4704ec/numpy-1.22.0-cp38-cp38-macosx_10_9_universal2.whl > download/numpy-1.22.0-cp38-cp38-macosx_10_9_universal2.whl
+          python3 -m pip install ./download/numpy-1.22.0-cp38-cp38-macosx_10_9_universal2.whl
 
-          python3 -m pip install --upgrade pip pip-licenses setuptools wheel
+          # 以下、普通にインストールするとx86_64版になるのが、自前でビルド可能なのでビルドする
+          python3 -m pip install --no-binary :all: cython==0.29.24 pydantic==1.8.2 cffi==1.15.0 SoundFile==0.10.3.post1 pyyaml==6.0
+
+          python3 -m pip install --upgrade pip setuptools wheel
           python3 -m pip install -r requirements-dev.txt
 
       - name: Generate licenses.json
@@ -186,6 +177,11 @@ jobs:
           # Replace version
           gsed -i "s/__version__ = \"latest\"/__version__ = \"${{ env.VOICEVOX_ENGINE_VERSION }}\"/" ../voicevox_engine/__init__.py
 
+          # numpyとscipyで被っている.dylibを消す(重複しているものをNuitkaで処理しようとしてエラーが発生するので)
+          # numpyのものは/usr/local/libに移動させる(/usr/local/libにあるものはNuitkaが認識してくれるため)
+          sudo mv /Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages/numpy/.dylibs/* /usr/local/lib/
+          sudo rm -r /Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages/numpy/.dylibs
+          sudo rm -r /Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages/scipy/.dylibs
           # Nuitka does not copy grandchild dependencies. Explicitly copy libonnxruntime
           python3 -m nuitka \
             --output-dir=./ \
@@ -205,7 +201,9 @@ jobs:
             --include-data-file=../download/core/metas.json=./ \
             --include-data-file=../download/core/${{ matrix.voicevox_core_library_name }}=./ \
             --include-data-file=../download/onnxruntime/lib/libonnxruntime.dylib=./ \
-            --include-data-file=/usr/local/lib/python3.8/site-packages/scipy/.dylibs/*.dylib=./scipy/.dylibs/ \
+            --include-data-file=/usr/local/lib/libgcc_s.2.dylib=./scipy/.dylibs/ \
+            --include-data-file=/usr/local/lib/libgfortran.5.dylib=./scipy/.dylibs/ \
+            --include-data-file=/usr/local/lib/libopenblas64_.0.dylib=./scipy/.dylibs/ \
             --include-data-file=/usr/local/lib/libsndfile.*=./_soundfile_data/ \
             --include-data-dir=../speaker_info=./speaker_info \
             --follow-imports \
