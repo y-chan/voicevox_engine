@@ -104,20 +104,24 @@ def generate_licenses() -> List[License]:
         )
 
     # pip
-    licenses_json = json.loads(
-        subprocess.run(
-            "pip-licenses "
-            "--from=mixed "
-            "--format=json "
-            "--with-urls "
-            "--with-license-file "
-            "--no-license-path ",
-            shell=True,
-            capture_output=True,
-            check=True,
-            env=os.environ,
-        ).stdout.decode()
+    licenses_json_process = subprocess.run(
+        "pip-licenses "
+        "--from=mixed "
+        "--format=json "
+        "--with-urls "
+        "--with-license-file "
+        "--no-license-path ",
+        shell=True,
+        capture_output=True,
+        env=os.environ,
     )
+    if licenses_json_process.returncode != 0:
+        raise RuntimeError(f"Error {licenses_json_process.returncode}: {licenses_json_process.stderr.decode()}")
+
+    licenses_json = json.loads(
+        licenses_json_process.stdout.decode()
+    )
+
     for license_json in licenses_json:
         license = License(
             name=license_json["Name"],
