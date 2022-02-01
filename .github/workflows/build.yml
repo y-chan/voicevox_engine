@@ -61,6 +61,36 @@ jobs:
         shell: bash
         run: lipo -archs /Library/Frameworks/Python.framework/Versions/3.8/bin/python3
 
+      # Build libsndfile for OSX Universal2
+      - name: Prepare Libsndfile ${{ matrix.libsndfile_version }} cache
+        uses: actions/cache@v2
+        id: libsndfile-cache
+        with:
+          key: python-${{ matrix.libsndfile_version }}
+          path: download/libsndfile
+
+      - name: Checkout Libsndfile ${{ matrix.libsndfile_version }}
+        if: steps.libsndfile-cache.outputs.cache-hit != 'true'
+        uses: actions/checkout@v2
+        with:
+          repository: libsndfile/libsndfile
+          ref: ${{ matrix.libsndfile_version }}
+          path: download/libsndfile
+
+      - name: Build and Install Libsndfile ${{ matrix.libsndfile_version }}
+        shell: bash
+        run: |
+          set -eux
+          brew install autoconf autogen automake
+          ./autogen.sh
+          ./configure --disable-external-libs --disable-mpeg
+          make
+          sudo make install
+        working-directory: download/libsndfile
+        env:
+          CFLAGS: -arch arm64 -arch x86_64
+          LDFLAGS: -arch arm64 -arch x86_64
+
       - name: Install Python dependencies
         shell: bash
         run: |
