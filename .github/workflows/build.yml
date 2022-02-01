@@ -182,7 +182,7 @@ jobs:
             -change @loader_path/../.dylibs/libopenblas64_.0.dylib \
             /Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages/numpy/.dylibs/libopenblas64_.0.dylib \
             /Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages/numpy/core/_multiarray_umath.cpython-38-darwin.so
-  
+
           # Nuitka does not copy grandchild dependencies. Explicitly copy libonnxruntime
           python3 -m nuitka \
             --output-dir=./ \
@@ -202,9 +202,7 @@ jobs:
             --include-data-file=../download/core/metas.json=./ \
             --include-data-file=../download/core/${{ matrix.voicevox_core_library_name }}=./ \
             --include-data-file=../download/onnxruntime/lib/libonnxruntime.dylib=./ \
-            --include-data-file=/usr/local/lib/libgcc_s.2.dylib=./scipy/.dylibs/ \
-            --include-data-file=/usr/local/lib/libgfortran.5.dylib=./scipy/.dylibs/ \
-            --include-data-file=/usr/local/lib/libopenblas64_.0.dylib=./scipy/.dylibs/ \
+            --include-data-file=/Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages/scipy/.dylibs/*.dylib=./scipy/.dylibs/ \
             --include-data-file=/usr/local/lib/libsndfile.*=./_soundfile_data/ \
             --include-data-dir=../speaker_info=./speaker_info \
             --follow-imports \
