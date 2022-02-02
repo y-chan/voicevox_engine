@@ -204,14 +204,24 @@ jobs:
         run: |
           set -eux
 
+          # Nuitkaが、ビルド時にnumpy/scipy内部で使われているライブラリのパス解決をしようとして失敗するので、ここで指定して解決しておく
+          # ただ、Pythonのフォルダに含まれるパスを指定すると、install_name_toolが以下のようなエラーを吐くことがある
+          # changing install names or rpaths can't be redone for: <library name>
+          # because larger updated load commands do not fit
+          # (the program must be relinked, and you may need to use -headerpad or -headerpad_max_install_names)
+          # しかし、/usr/local/libなどのパスを指定すると、この問題を回避できるので、dylib群を一度/usr/local/libに移動させる
+          python3 build_util/macos/preprocess_nuitka_build.py \
+            /Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages/numpy/ \
+            -t /usr/local/lib/numpy
+          python3 build_util/macos/preprocess_nuitka_build.py \
+            /Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages/scipy/ \
+            -t /usr/local/lib/scipy
+          mv /Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages/numpy/.dylibs/ /usr/local/lib/numpy/
+          mv /Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages/scipy/.dylibs/ /usr/local/lib/scipy/
+
+          cd build
           # Replace version
           gsed -i "s/__version__ = \"latest\"/__version__ = \"${{ env.VOICEVOX_ENGINE_VERSION }}\"/" ../voicevox_engine/__init__.py
-
-          # numpy内部で使われているライブラリのパス解決をしようとして失敗するので、パスを変更する
-          sudo install_name_tool \
-            -change @loader_path/../.dylibs/libopenblas64_.0.dylib \
-            /Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages/numpy/.dylibs/libopenblas64_.0.dylib \
-            /Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages/numpy/core/_multiarray_umath.cpython-38-darwin.so
 
           # Nuitka does not copy grandchild dependencies. Explicitly copy libonnxruntime
           python3 -m nuitka \
@@ -232,7 +242,7 @@ jobs:
             --include-data-file=../download/core/metas.json=./ \
             --include-data-file=../download/core/${{ matrix.voicevox_core_library_name }}=./ \
             --include-data-file=../download/onnxruntime/lib/libonnxruntime.dylib=./ \
-            --include-data-file=/Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages/scipy/.dylibs/*.dylib=./scipy/.dylibs/ \
+            --include-data-file=/usr/local/lib/scipy/*.dylib=./scipy/.dylibs/ \
             --include-data-file=/usr/local/lib/libsndfile.*=./_soundfile_data/ \
             --include-data-dir=../speaker_info=./speaker_info \
             --follow-imports \
@@ -240,7 +250,6 @@ jobs:
             ../run.py
           # Universal版共有ライブラリをコピーしてくる
           # cp ../download/numpy/.dylibs/* .
-        working-directory: build
         env:
           CCFLAGS: -arch arm64 -arch x86_64
           LDFLAGS: -arch arm64 -arch x86_64

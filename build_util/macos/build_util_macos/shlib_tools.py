@@ -12,6 +12,11 @@ def get_dylib_paths(base_path: Path) -> List[Path]:
     return list(base_path.glob("**/*.dylib"))
 
 
+def get_so_paths(base_path: Path) -> List[Path]:
+    """base_path以下の全てのサブディレクトリにあるsoファイルのリストを返す"""
+    return list(base_path.glob("**/*.so"))
+
+
 def get_rpaths(shared_lib_path: Path) -> List[Path]:
     """引数で指定された共有ライブラリのrpathのリストを返す"""
     proc = subprocess.run(["otool", "-L", str(shared_lib_path)], stdout=subprocess.PIPE)
@@ -74,6 +79,19 @@ def change_rpath(old_rpath: Path, new_rpath: Path, dylib_path: Path, base_path: 
     )
 
 
+def change_rpath_to_new_path(old_rpath: Path, new_rpath: Path, lib_path: Path):
+    """lib_pathで指定されたdylub/soのrpathを、old_rpathから、指定したnew_rpathに変更する"""
+    subprocess.run(
+        [
+            "install_name_tool",
+            "-change",
+            old_rpath,
+            new_rpath,
+            lib_path,
+        ]
+    )
+
+
 class SharedLib:
     """共有ライブラリの情報"""
 
@@ -87,6 +105,10 @@ class SharedLib:
     @property
     def path(self) -> Path:
         return self.__path
+
+    @property
+    def rpaths(self) -> List[Path]:
+        return self.__rpaths
 
     def get_non_distributable_rpaths(self) -> List[Path]:
         """rpathのうち、開発環境に依存しているもののリスト"""
