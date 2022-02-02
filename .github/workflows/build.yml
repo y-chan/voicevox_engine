@@ -77,19 +77,30 @@ jobs:
           ref: ${{ matrix.libsndfile_version }}
           path: download/libsndfile
 
-      - name: Build and Install Libsndfile ${{ matrix.libsndfile_version }}
+      # https://github.com/libsndfile/libsndfile/issues/678#issuecomment-749165811
+      - name: Build Libsndfile ${{ matrix.libsndfile_version }}
         shell: bash
         run: |
           set -eux
-          brew install autoconf autogen automake
-          ./autogen.sh
-          ./configure --disable-external-libs --disable-mpeg
-          make
-          sudo make install
-        working-directory: download/libsndfile
-        env:
-          CFLAGS: -arch arm64 -arch x86_64
-          LDFLAGS: -arch arm64 -arch x86_64
+          mkdir libsndfile-libraries
+          cd libsndfile
+          cmake -DCMAKE_OSX_ARCHITECTURES=x86_64 -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 -DBUILD_SHARED_LIBS=ON .
+          cmake --build .
+          cp libsndfile.dylib ../libsndfile-libraries/libsndfile-x64.dylib
+          cp libsndfile.1.dylib ../libsndfile-libraries/libsndfile-x64.1.dylib
+          cp libsndfile.${{ matrix.libsndfile_version }}.dylib ../libsndfile-libraries/libsndfile-x64.${{ matrix.libsndfile_version }}.dylib
+
+          cmake -DCMAKE_OSX_ARCHITECTURES=arm64 -DBUILD_SHARED_LIBS=ON .
+          cmake --build .
+          cp libsndfile.dylib ../libsndfile-libraries/libsndfile-arm64.dylib
+          cp libsndfile.1.dylib ../libsndfile-libraries/libsndfile-arm64.1.dylib
+          cp libsndfile.${{ matrix.libsndfile_version }}.dylib ../libsndfile-libraries/libsndfile-arm64.${{ matrix.libsndfile_version }}.dylib
+
+          cd ../libsndfile-libraries
+          lipo libsndfile-x64.dylib libsndfile-arm64.dylib -create -output libsndfile.dylib
+          lipo libsndfile-x64.1.dylib libsndfile-arm64.1.dylib -create -output libsndfile.1.dylib
+          lipo libsndfile-x64.${{ matrix.libsndfile_version }}.dylib libsndfile-arm64.${{ matrix.libsndfile_version }}.dylib -create -output libsndfile.${{ matrix.libsndfile_version }}.dylib
+        working-directory: download
 
       - name: Install Python dependencies
         shell: bash
@@ -243,7 +254,7 @@ jobs:
             --include-data-file=../download/core/${{ matrix.voicevox_core_library_name }}=./ \
             --include-data-file=../download/onnxruntime/lib/libonnxruntime.dylib=./ \
             --include-data-file=/usr/local/lib/scipy/*.dylib=./scipy/.dylibs/ \
-            --include-data-file=/usr/local/lib/libsndfile.*=./_soundfile_data/ \
+            --include-data-file=../download/libsndfile-libraries/*.dylib=./_soundfile_data/ \
             --include-data-dir=../speaker_info=./speaker_info \
             --follow-imports \
             --no-prefer-source-code \
