@@ -3,7 +3,6 @@ fastapi
 python-multipart
 uvicorn
 aiofiles
-soundfile
 scipy==1.8.0rc3
 PyYAML
 git+https://github.com/y-chan/Python-Wrapper-for-World-Vocoder@9eae2c7abff9389327c3b3d454975b994c0633aa#egg=pyworld

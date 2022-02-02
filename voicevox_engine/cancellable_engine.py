@@ -4,10 +4,10 @@ import queue
 from multiprocessing import Pipe, Process
 from multiprocessing.connection import Connection
 from pathlib import Path
+from scipy.io import wavfile
 from tempfile import NamedTemporaryFile
 from typing import List, Optional, Tuple
 
-import soundfile
 
 # FIXME: remove FastAPI dependency
 from fastapi import HTTPException, Request
@@ -204,8 +204,8 @@ def start_synthesis_subprocess(
             query, speaker_id = sub_proc_con.recv()
             wave = engine.synthesis(query=query, speaker_id=speaker_id)
             with NamedTemporaryFile(delete=False) as f:
-                soundfile.write(
-                    file=f, data=wave, samplerate=query.outputSamplingRate, format="WAV"
+                wavfile.write(
+                    filename=f, rate=query.outputSamplingRate, data=wave
                 )
             sub_proc_con.send(f.name)
         except Exception:

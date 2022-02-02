@@ -3,7 +3,7 @@ import io
 from typing import List, Tuple
 
 import numpy as np
-import soundfile
+from scipy.io import wavfile
 
 
 class ConnectBase64WavesException(Exception):
@@ -11,7 +11,7 @@ class ConnectBase64WavesException(Exception):
         self.message = message
 
 
-def decode_base64_waves(waves: List[str]) -> Tuple[List[np.ndarray], float]:
+def decode_base64_waves(waves: List[str]) -> Tuple[List[np.ndarray], int]:
     if len(waves) == 0:
         raise ConnectBase64WavesException("wavファイルが含まれていません")
 
@@ -22,7 +22,7 @@ def decode_base64_waves(waves: List[str]) -> Tuple[List[np.ndarray], float]:
         except ValueError:
             raise ConnectBase64WavesException("base64デコードに失敗しました")
         try:
-            _data, _sampling_rate = soundfile.read(io.BytesIO(wav_bin))
+            _sampling_rate, _data = wavfile.read(io.BytesIO(wav_bin))
         except Exception:
             raise ConnectBase64WavesException("wavファイルを読み込めませんでした")
         if i == 0:

@@ -89,8 +89,6 @@ six==1.16.0
     #   virtualenv
 sniffio==1.2.0
     # via anyio
-soundfile==0.10.3.post1
-    # via -r requirements.in
 starlette==0.16.0
     # via fastapi
 toml==0.10.2
