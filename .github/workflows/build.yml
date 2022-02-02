@@ -24,11 +24,6 @@ jobs:
         include:
         - os: macos-11
           pip_cache_path: ~/Library/Caches/pip
-          libogg_version: '1.3.5'
-          opus_version: '1.1.2'
-          libvorbis_version: '1.3.7'
-          flac_version: '1.3.3'
-          libsndfile_version: '1.0.31'
           voicevox_core_library_name: libcore_cpu_universal2.dylib
           onnxruntime_url: https://github.com/microsoft/onnxruntime/releases/download/v1.10.0/onnxruntime-osx-universal2-1.10.0.tgz
           artifact_name: macos-universal2
@@ -63,69 +58,6 @@ jobs:
       - name: Show Python binary archs (debug info)
         shell: bash
         run: lipo -archs /Library/Frameworks/Python.framework/Versions/3.8/bin/python3
-
-      # Build libsndfile for OSX Universal2
-      # あらかじめインストールされているものをLibsndfileビルド時に誤ってリンクしないように、アンインストール
-      - name: Uninstall libvorbis, flac, opus and libogg
-        run: brew uninstall --ignore-dependencies libsndfile libvorbis flac opus libogg
-
-      - name: Checkout Libogg ${{ matrix.libogg_version }}
-        uses: actions/checkout@v2
-        with:
-          repository: xiph/ogg
-          ref: v${{ matrix.libogg_version }}
-          path: download/ogg
-
-      - name: Checkout opus ${{ matrix.opus_version }}
-        uses: actions/checkout@v2
-        with:
-          repository: xiph/opus
-          ref: v${{ matrix.opus_version }}
-          path: download/opus
-
-      - name: Checkout Libvorbis ${{ matrix.libvorbis_version }}
-        uses: actions/checkout@v2
-        with:
-          repository: xiph/vorbis
-          ref: v${{ matrix.libvorbis_version }}
-          path: download/vorbis
-
-      - name: Checkout flac ${{ matrix.flac_version }}
-        uses: actions/checkout@v2
-        with:
-          repository: xiph/flac
-          ref: ${{ matrix.flac_version }}
-          path: download/flac
-
-      - name: Checkout Libsndfile ${{ matrix.libsndfile_version }}
-        uses: actions/checkout@v2
-        with:
-          repository: libsndfile/libsndfile
-          ref: ${{ matrix.libsndfile_version }}
-          path: download/libsndfile
-
-      - name: Build and Install Libsndfile ${{ matrix.libsndfile_version }} and dependencies
-        shell: bash
-        run: |
-          brew install autoconf autogen automake
-          # 処理簡略化のため、なんでも良いのでディレクトリに入っておく(oggである意味はない)
-          cd ogg
-          for lib_name in ogg opus vorbis flac libsndfile; do
-            cd ../$lib_name
-            ./autogen.sh
-            if [ "$lib_name" = "flac" ]; then
-              ./configure --with-ogg="/usr/local/lib"
-            else
-              ./configure
-            fi
-            make
-            sudo make install
-          done
-        working-directory: download
-        env:
-          CFLAGS: -arch arm64 -arch x86_64
-          CXXFLAGS: -arch arm64 -arch x86_64
-          LDFLAGS: -arch arm64 -arch x86_64
 
       - name: Install Python dependencies
         shell: bash
@@ -279,7 +211,6 @@ jobs:
             --include-data-file=../download/core/${{ matrix.voicevox_core_library_name }}=./ \
             --include-data-file=../download/onnxruntime/lib/libonnxruntime.dylib=./ \
             --include-data-file=/usr/local/lib/scipy/*.dylib=./scipy/.dylibs/ \
-            --include-data-file=/usr/local/lib/libsndfile.*=./_soundfile_data/ \
             --include-data-dir=../speaker_info=./speaker_info \
             --follow-imports \
             --no-prefer-source-code \
