@@ -24,7 +24,6 @@ jobs:
         include:
         - os: macos-11
           pip_cache_path: ~/Library/Caches/pip
-          openssl_version: '3.0.1'
           libsndfile_version: '1.0.31'
           voicevox_core_library_name: libcore_cpu_universal2.dylib
           onnxruntime_url: https://github.com/microsoft/onnxruntime/releases/download/v1.10.0/onnxruntime-osx-universal2-1.10.0.tgz
