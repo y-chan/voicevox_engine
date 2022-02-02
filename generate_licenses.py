@@ -8,7 +8,6 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import List, Optional
 
-
 # osxのuniversal libraryビルド時に、SSLエラーに引っかかるので、それを回避する
 if platform.system() == "Darwin" and os.environ.get("CI") == "true":
     ssl._create_default_https_context = ssl._create_unverified_context
@@ -116,11 +115,11 @@ def generate_licenses() -> List[License]:
         env=os.environ,
     )
     if licenses_json_process.returncode != 0:
-        raise RuntimeError(f"Error {licenses_json_process.returncode}: {licenses_json_process.stderr.decode()}")
+        raise RuntimeError(
+            f"Error {licenses_json_process.returncode}: {licenses_json_process.stderr.decode()}"
+        )
 
-    licenses_json = json.loads(
-        licenses_json_process.stdout.decode()
-    )
+    licenses_json = json.loads(licenses_json_process.stdout.decode())
 
     for license_json in licenses_json:
         license = License(

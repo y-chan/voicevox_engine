@@ -288,7 +288,9 @@ def generate_app(
 
         with NamedTemporaryFile(delete=False) as f:
             wavfile.write(
-                filename=f, rate=query.outputSamplingRate, data=wave,
+                filename=f,
+                rate=query.outputSamplingRate,
+                data=wave,
             )
 
         return FileResponse(f.name, media_type="audio/wav")
