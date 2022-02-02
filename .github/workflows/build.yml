@@ -10,7 +10,7 @@ on:
 
 env:
   IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/voicevox_engine
-  PYTHON_VERSION: '3.8.10'
+  PYTHON_VERSION: '3.9.10'
   VOICEVOX_RESOURCE_VERSION: '0.10.0'
   VOICEVOX_CORE_VERSION: '0.10.0'
   VOICEVOX_ENGINE_VERSION: |- # releaseのときはタグが、それ以外はlatestがバージョン名に
@@ -52,26 +52,34 @@ jobs:
           curl -L https://www.python.org/ftp/python/${{ env.PYTHON_VERSION }}/python-${{ env.PYTHON_VERSION }}-macos11.pkg > download/python-${{ env.PYTHON_VERSION }}-macos11.pkg
           sudo installer -pkg download/python-${{ env.PYTHON_VERSION }}-macos11.pkg -target /
           # Test
-          echo "/Library/Frameworks/Python.framework/Versions/3.8/bin/" >> $GITHUB_PATH
+          echo "/Library/Frameworks/Python.framework/Versions/3.9/bin/" >> $GITHUB_PATH
           python3 --version
 
       - name: Show Python binary archs (debug info)
         shell: bash
-        run: lipo -archs /Library/Frameworks/Python.framework/Versions/3.8/bin/python3
+        run: lipo -archs /Library/Frameworks/Python.framework/Versions/3.9/bin/python3
 
       - name: Install Python dependencies
         shell: bash
         run: |
           # TODO: バージョン指定で導入しているので、requirements-*.txtが更新された際に忘れそう
           # pipでインストールされるnumpyはx86_64版になるので、あらかじめuniversal2版を入れておく
-          curl -L https://files.pythonhosted.org/packages/72/45/6749d5851b31f66db379760b6d9053d2d99f72ba19fa114c9b893c4704ec/numpy-1.22.0-cp38-cp38-macosx_10_9_universal2.whl > download/numpy-1.22.0-cp38-cp38-macosx_10_9_universal2.whl
-          python3 -m pip install ./download/numpy-1.22.0-cp38-cp38-macosx_10_9_universal2.whl
+          curl -L https://files.pythonhosted.org/packages/3e/4e/a18f88159322c2dcfed1e1e72dcc6be7e50f86a65c5b814440969aca7c7a/numpy-1.22.0-cp39-cp39-macosx_10_9_universal2.whl > download/numpy-1.22.0-cp39-cp39-macosx_10_9_universal2.whl
+          python3 -m pip install ./download/numpy-1.22.0-cp39-cp39-macosx_10_9_universal2.whl
 
-          # 以下、普通にインストールするとx86_64版になるのが、自前でビルド可能なのでビルドする
-          python3 -m pip install --no-binary :all: cython==0.29.24 pydantic==1.8.2 cffi==1.15.0 SoundFile==0.10.3.post1 pyyaml==6.0
+          # 普通にインストールするとx86_64版になるのが、自前でビルド可能なのでビルドする
+          python3 -m pip install --no-binary :all: cython==0.29.24 pydantic==1.8.2
 
           python3 -m pip install --upgrade pip setuptools wheel
           python3 -m pip install -r requirements-dev.txt
+
+          # pyyamlの共有ライブラリをuniversalにする
+          cd download
+          curl -O https://files.pythonhosted.org/packages/67/d4/b95266228a25ef5bd70984c08b4efce2c035a4baa5ccafa827b266e3dc36/PyYAML-6.0-cp39-cp39-macosx_11_0_arm64.whl
+          unzip PyYAML-6.0-cp39-cp39-macosx_11_0_arm64.whl
+          mv /Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/yaml/_yaml.cpython-39-darwin.so _yaml.cpython-39-darwin_x64.so
+          lipo -create yaml/_yaml.cpython-39-darwin.so _yaml.cpython-39-darwin_x64.so  -o _yaml.cpython-39-darwin.so
+          mv _yaml.cpython-39-darwin.so /Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/yaml/
 
       - name: Generate licenses.json
         shell: bash
@@ -179,13 +187,13 @@ jobs:
           # (the program must be relinked, and you may need to use -headerpad or -headerpad_max_install_names)
           # しかし、/usr/local/libなどのパスを指定すると、この問題を回避できるので、dylib群を一度/usr/local/libに移動させる
           python3 build_util/macos/preprocess_nuitka_build.py \
-            /Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages/numpy/ \
+            /Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/numpy/ \
             -t /usr/local/lib/numpy
           python3 build_util/macos/preprocess_nuitka_build.py \
-            /Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages/scipy/ \
+            /Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/scipy/ \
             -t /usr/local/lib/scipy
-          mv /Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages/numpy/.dylibs/ /usr/local/lib/numpy/
-          mv /Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages/scipy/.dylibs/ /usr/local/lib/scipy/
+          mv /Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/numpy/.dylibs/ /usr/local/lib/numpy/
+          mv /Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/scipy/.dylibs/ /usr/local/lib/scipy/
 
           cd build
           # Replace version
@@ -215,8 +223,6 @@ jobs:
             --follow-imports \
             --no-prefer-source-code \
             ../run.py
-          # Universal版共有ライブラリをコピーしてくる
-          # cp ../download/numpy/.dylibs/* .
         env:
           CCFLAGS: -arch arm64 -arch x86_64
           LDFLAGS: -arch arm64 -arch x86_64
