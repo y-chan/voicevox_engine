@@ -28,7 +28,6 @@ jobs:
           opus_version: '1.1.2'
           libvorbis_version: '1.3.7'
           flac_version: '1.3.3'
-          libmpg123_version: '1.29.3'
           libsndfile_version: '1.0.31'
           voicevox_core_library_name: libcore_cpu_universal2.dylib
           onnxruntime_url: https://github.com/microsoft/onnxruntime/releases/download/v1.10.0/onnxruntime-osx-universal2-1.10.0.tgz
@@ -98,14 +97,6 @@ jobs:
           ref: ${{ matrix.flac_version }}
           path: download/flac
 
-      - name: Download libmpg123 ${{ matrix.libmpg123_version }}
-        run: |
-          curl -O https://www.mpg123.de/download/mpg123-${{ matrix.libmpg123_version }}.tar.bz2
-          tar xf mpg123-${{ matrix.libmpg123_version }}.tar.bz2
-          mv mpg123-${{ matrix.libmpg123_version }} mpg123
-          rm mpg123-${{ matrix.libmpg123_version }}.tar.bz2
-        working-directory: download/
-
       - name: Checkout Libsndfile ${{ matrix.libsndfile_version }}
         uses: actions/checkout@v2
         with:
@@ -119,11 +110,9 @@ jobs:
           brew install autoconf autogen automake
           # 処理簡略化のため、なんでも良いのでディレクトリに入っておく(oggである意味はない)
           cd ogg
-          for lib_name in ogg opus vorbis flac mpg123 libsndfile; do
+          for lib_name in ogg opus vorbis flac libsndfile; do
             cd ../$lib_name
-            if [ "$lib_name" != "mpg123" ]; then
-              ./autogen.sh
-            fi
+            ./autogen.sh
             if [ "$lib_name" = "flac" ]; then
               ./configure --with-ogg="/usr/local/lib"
             else
