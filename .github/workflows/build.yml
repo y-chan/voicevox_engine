@@ -194,6 +194,8 @@ jobs:
             -t /usr/local/lib/scipy
           mv /Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/numpy/.dylibs/ /usr/local/lib/numpy/
           mv /Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/scipy/.dylibs/ /usr/local/lib/scipy/
+          python3 build_util/macos/fix_install_id.py /usr/local/lib/numpy/
+          python3 build_util/macos/fix_install_id.py /usr/local/lib/scipy/
 
           cd build
           # Replace version

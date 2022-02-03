@@ -92,6 +92,18 @@ def change_rpath_to_new_path(old_rpath: Path, new_rpath: Path, lib_path: Path):
     )
 
 
+def change_install_id(install_id_path: Path, dylib_path: Path):
+    """dylib_pathで指定されたdylibのinstall idを、指定したinstall_id_pathに変更する"""
+    subprocess.run(
+        [
+            "install_name_tool",
+            "-id",
+            install_id_path,
+            dylib_path,
+        ]
+    )
+
+
 class SharedLib:
     """共有ライブラリの情報"""
 
