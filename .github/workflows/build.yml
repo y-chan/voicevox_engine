@@ -188,7 +188,7 @@ jobs:
           # しかし、/usr/local/libなどのパスを指定すると、この問題を回避できるので、dylib群を一度/usr/local/libに移動させる
           python3 build_util/macos/preprocess_nuitka_build.py \
             /Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/numpy/ \
-            -t /usr/local/lib/numpy
+            -t /usr/local/lib/scipy
           python3 build_util/macos/preprocess_nuitka_build.py \
             /Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/scipy/ \
             -t /usr/local/lib/scipy
