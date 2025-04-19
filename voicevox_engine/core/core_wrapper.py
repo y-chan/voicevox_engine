@@ -559,7 +559,7 @@ class CoreWrapper:
         cpu_num_threads: int = 0,
         load_all_models: bool = False,
     ) -> None:
-        self.default_sampling_rate = 24000
+        self.default_sampling_rate = 48000
 
         self.core = load_core(core_dir, use_gpu)
 
@@ -881,7 +881,8 @@ class CoreWrapper:
             音声波形
         """
         if self.api_exists["sf_decode_forward"]:
-            output = np.zeros((length * 256,), dtype=np.float32)
+            # output = np.zeros((length * 256,), dtype=np.float32)
+            output = np.zeros((length * 512,), dtype=np.float32)
             self.assert_core_success(
                 self.core.sf_decode_forward(
                     c_int(length),

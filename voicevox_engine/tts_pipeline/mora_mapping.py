@@ -359,6 +359,14 @@ _mora_list_minimum: list[tuple[_MoraKana, Consonant | None, BaseVowel]] = [
     ("イェ", "y", "e"),
     ("イ", None, "i"),
     ("ア", None, "a"),
+    ("息", None, "br"),
+    ("休", None, "pau"),
+    ("’オ", "ed", "o"),
+    ("’エ", "ed", "e"),
+    ("’ウ", "ed", "u"),
+    ("’イ", "ed", "i"),
+    ("’ア", "ed", "a"),
+    ("’ン", "ed", "N"),
 ]
 _mora_list_additional: list[tuple[_MoraKana, Consonant | None, BaseVowel]] = [
     ("ヴョ", "by", "o"),
