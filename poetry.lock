@@ -1865,8 +1865,8 @@ test = ["pytest", "scipy"]
 [package.source]
 type = "git"
 url = "https://github.com/VOICEVOX/pyopenjtalk"
-reference = "b35fc89fe42948a28e33aed886ea145a51113f88"
-resolved_reference = "b35fc89fe42948a28e33aed886ea145a51113f88"
+reference = "5b70b94f3460ece07ea183227db088ce8d5212a6"
+resolved_reference = "5b70b94f3460ece07ea183227db088ce8d5212a6"
 
 [[package]]
 name = "pyproject-hooks"
