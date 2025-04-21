@@ -6,7 +6,7 @@
     "version": "999.999.999",
     "url": "https://github.com/VOICEVOX/voicevox_engine",
     "command": "run",
-    "port": 50021,
+    "port": 50055,
     "icon": "resources/engine_manifest_assets/icon.png",
     "default_sampling_rate": 48000,
     "frame_rate": 93.75,
